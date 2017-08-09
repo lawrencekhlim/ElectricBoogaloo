@@ -1,4 +1,4 @@
-ss PlaysoundException(Exception):
+class PlaysoundException(Exception):
     pass
 
 def _playsoundWin(sound, block = True):
