@@ -36,6 +36,7 @@ def play_music(music_file, volume=0.8):
     stream music with mixer.music module in a blocking manner
     this will stream the sound from disk while playing
     '''
+    '''
     # set up the mixer
     freq = 44100     # audio CD quality
     bitsize = -16    # unsigned 16 bit
@@ -55,6 +56,16 @@ def play_music(music_file, volume=0.8):
     while pg.mixer.music.get_busy():
         # check if playback has finished
         clock.tick(30)
+    '''
+    pg.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
+
+    pg.init()
+
+    pg.mixer.init()
+
+    pg.mixer.music.load(music_file)
+
+    pg.mixer.music.play(-1)
 #play_music(filename)
 
 
@@ -96,7 +107,7 @@ f.close()
 
 print (time.time())
 
-p.play()
+#p.play()
 
 ##### Testing ways of playing sound 2
 
