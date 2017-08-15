@@ -3,7 +3,7 @@ from __future__ import print_function
 import librosa
 import IPython.lib.display as player 
 import pygame as pg
-
+import tkinter
 
 # 1. Get the file path to the included audio example
 filename = "test.mp3"
@@ -115,9 +115,8 @@ print (time.time())
 #subprocess.call ( [ sound_program, filename] )
 #webbrower.open (filename)
 
-play_music(filename)
-
 #####
 
+play_music(filename)
 s.run()
-print (time.time())
+#print (time.time())
