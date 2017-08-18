@@ -16,6 +16,9 @@ player.Audio(filename = filename)
 tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
 
 
+# Run onset tracker
+onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
+
 print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
 
 
@@ -23,11 +26,13 @@ print('Estimated tempo: {:.2f} beats per minute'.format(tempo))
 # 4. Convert the frame indices of beat events into timestamps
 beat_times = librosa.frames_to_time(beat_frames, sr=sr)
 
+onset_times = librosa.frames_to_time(onset_frames, sr=sr)
+
 
 
 print('Saving output to beat_times.csv')
 librosa.output.times_csv('beat_times.csv', beat_times)
-
+librosa.output.times_csv('onset_times.csv', onset_times)
 
 ################################################
 # This code will play the music
@@ -80,12 +85,28 @@ s = sched.scheduler (time.time, time.sleep)
 def beat_time (param="default parameter"):
      print ("From beat_time", time.time(), param)
 
+
+def onset_time (param="default parameter"):
+     print ("From onset_time", time.time(), param)
+
+
+
 f = open ("beat_times.csv", "r")
 for line in f:
-     s.enter (float(line), 1, beat_time, argument=("Beat",))
+     #s.enter (float(line), 1, beat_time, argument=("Beat",))
      print ("Entered into scheduler ", float (line))
 
 f.close()
+
+
+
+f2 = open ("onset_times.csv", "r")
+for line in f2:
+     s.enter (float(line), 1, onset_time, argument=("Onset",))
+     print ("Entered into scheduler ", float (line))
+
+f2.close()
+
 
 ##### Testing ways of playing sound
 
