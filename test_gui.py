@@ -2,13 +2,15 @@ import tkinter
 import sched, time
 import pygame as pg
 import librosa
+import os
 
 class SimpleLayoutApplication:
     def beat_time(self, param="default parameter"):
         print("From beat_time", time.time(), param)
 
-    def __init__(self):
-        
+    def __init__(self, filename):
+        self.filename = filename
+	
         self.height = 600
         self.width = 80
         self.delay = 50
@@ -16,14 +18,24 @@ class SimpleLayoutApplication:
         self._root_window = tkinter.Tk()
 
         self._canvas = tkinter.Canvas(
-            master = self._root_window,width = self.width, height=self.height, background = '#600000')
-        self._canvas.pack()
+            master = self._root_window,width = self.width, height=self.height, background = 'yellow')
+        #self._canvas.pack()
+
+        self._canvas.grid(
+        row = 0, column = 0, padx = 5, pady = 5,
+        sticky = tkinter.N + tkinter.S + tkinter.W + tkinter.E)
+
+        self._canvas.bind('<Configure>', self._on_canvas_resized)
+
+        self._root_window.rowconfigure(0, weight = 1)
+        self._root_window.columnconfigure(0, weight = 1)
+
         # All objects the canvas is animating
         self._objects = []
         
         
         self._times = []
-        f = open('onset_times.csv', 'r')
+        f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
         for line in f:
             self._times.append(int(float(line.strip())*1000))
             rect = ScheduledRectangle (int (float(line.strip())*1000) , self.delay, self.width, self.height,20)
@@ -32,10 +44,15 @@ class SimpleLayoutApplication:
         
         self._current_time = self._times.pop(0)	
         
+    def _on_canvas_resized(self, event: tkinter.Event) -> None:
+        canvas_width = self._canvas.winfo_width()
+        for obj in self._objects:
+            obj.coordinates['botRightX'] = canvas_width
 
-        
+        self.redrawAll() 
+
     def run(self):
-        play_music ("test.mp3")
+        play_music (self.filename)
         self._root_window.after(self.delay, self.timerFired)
         self._root_window.mainloop()
     
@@ -173,12 +190,17 @@ def play_music(music_file, volume=0.8):
 
 if __name__ == '__main__':
     
-    filename = "test.mp3"
+    filename = "test3.mp3"
         
-    y, sr = librosa.load(filename)
-        
-    onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
-     
-    onset_times = librosa.frames_to_time(onset_frames, sr=sr)
-    librosa.output.times_csv('onset_times.csv', onset_times)
-    SimpleLayoutApplication().run()
+    current_working_dir = os.getcwd()
+    if not os.path.exists(current_working_dir + '/OnsetTimes/'):
+        os.makedirs(current_working_dir + '/OnsetTimes/')
+
+    if not os.path.exists(current_working_dir + '/OnsetTimes/' + filename + '.csv'):
+        y, sr = librosa.load(filename)
+        onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
+        onset_times = librosa.frames_to_time(onset_frames, sr=sr) 
+        librosa.output.times_csv(current_working_dir + '/OnsetTimes/' + filename +'.csv', onset_times)
+
+    print('Starting to run the gui')
+    SimpleLayoutApplication(filename).run()

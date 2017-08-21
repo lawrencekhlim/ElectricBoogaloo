@@ -6,7 +6,7 @@ import pygame as pg
 import tkinter
 
 # 1. Get the file path to the included audio example
-filename = "test.mp3"
+filename = "test3.mp3"
 
 # 2. Load the audio as a waveform `y`
 #    Store the sampling rate as `sr`
