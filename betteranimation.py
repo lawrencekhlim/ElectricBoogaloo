@@ -1,8 +1,10 @@
 import tkinter
 import time
 import pygame as pg
+import numpy as np
 import librosa
 import os
+import csv
 
 class SimpleLayoutApplication:
 
@@ -14,7 +16,7 @@ class SimpleLayoutApplication:
 	
         self.height = 600
         self.width = 80
-        self.delay = 10
+        self.delay = 17
         
         self._root_window = tkinter.Tk()
 
@@ -39,11 +41,18 @@ class SimpleLayoutApplication:
         f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
         for line in f:
             self._times.append(int(float(line.strip())*1000))
-            rect = MovingRectangle (int (float(line.strip())*1000) , self.width, self.height,timetoReachBottom=3000)
+            rect = MovingRectangle (int (float(line.strip())*1000) , self.width, self.height,timetoReachBottom=4000)
             self._objects.append (rect)
-
         
-        self._current_time = self._times.pop(0)	
+        
+        # Deals with the spectrogram
+        y, sr = librosa.load(self.filename)
+        S = np.abs(librosa.stft(y))
+        arr = librosa.power_to_db(S**2)
+        self.transposed = [list(i) for i in zip(*arr)]
+        self.minimumVol = min(min(self.transposed))
+        self.maximumVol = max(max(self.transposed))-self.minimumVol
+
         
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
         canvas_width = self._canvas.winfo_width()
@@ -64,12 +73,6 @@ class SimpleLayoutApplication:
 
     
     def timerFired (self):
-        self.testdelay += 1
-        #print (self.testdelay)
-
-        if self.testdelay *self.delay % 1000 == 0:
-            print (self.testdelay * self.delay)
-
         
         self._canvas.delete("all")
         self._root_window.after (self.delay, self.timerFired)
@@ -77,7 +80,18 @@ class SimpleLayoutApplication:
         currenttime = self.sounds.get_position()
         #currenttime = get_position()
         print (currenttime)
+        framenumber = librosa.time_to_frames([currenttime/1000])
         
+        currentmaximumvolume = max(self.transposed [framenumber[0]])
+        percentmaxvolume = int(100*((currentmaximumvolume-self.minimumVol)/self.maximumVol))
+        print ((currentmaximumvolume-self.minimumVol))
+        print (self.maximumVol)
+        #print (percentmaxvolume)
+        
+        if (percentmaxvolume > 100):
+            print ("------------------------------------------")
+        
+        self._canvas.configure (background = '#%02x%02x%02x' % (150, percentmaxvolume, percentmaxvolume))
         
         for anobject in self._objects:
             anobject.move(currenttime)
@@ -95,7 +109,7 @@ class SimpleLayoutApplication:
 
 
 class Sound:
-    def play_music(self, music_file, volume=0.8):
+    def play_music(self, music_file, volume=0.5):
         '''
             stream music with mixer.music module in a blocking manner
             this will stream the sound from disk while playing
@@ -116,11 +130,11 @@ class Sound:
         except pg.error:
             print("File {} not found! ({})".format(music_file, pg.get_error()))
             return
-        pg.mixer.music.play()
+        pg.mixer.music.play(0)
         '''
-        while pg.mixer.music.get_busy():
+        if not pg.mixer.music.get_busy():
             # check if playback has finished
-            clock.tick(30)
+            pg.mixer.music.play(0)
         '''
         '''
         pg.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
@@ -220,20 +234,35 @@ class MovingRectangle:
 
 if __name__ == '__main__':
     
-    filename = "test.mp3"
+    #filename = "KoiNoShirushi.mp3"
+    #filename = "test.mp3"
+    filename = "discord.mp3"
     # For whatever reason, on betteranimation.py it can not play test2.py or test3.py, but can play test.py and other mp3 files.
     # Currently investigating this.
     
     current_working_dir = os.getcwd()
     if not os.path.exists(current_working_dir + '/OnsetTimes/'):
         os.makedirs(current_working_dir + '/OnsetTimes/')
-
+    '''
+    if not os.path.exists(current_working_dir + '/SpectroInfo/'):
+        os.makedirs(current_working_dir + '/SpectroInfo/')
+    '''
     if not os.path.exists(current_working_dir + '/OnsetTimes/' + filename + '.csv'):
         y, sr = librosa.load(filename)
         onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
         onset_times = librosa.frames_to_time(onset_frames, sr=sr) 
         librosa.output.times_csv(current_working_dir + '/OnsetTimes/' + filename +'.csv', onset_times)
-
+    '''
+    if not os.path.exists(current_working_dir + '/SpectroInfo/'+filename+'.csv'):
+        y, sr = librosa.load (filename)
+        S = np.abs (librosa.stft(y))
+        
+        arr = librosa.power_to_db(S**2)
+        transposearr = [list(i) for i in zip(*arr)]
+        
+        
+        os.makedirs(current_working_dir + '/SpectroInfo/')
+    '''
     print('Starting to run the gui')
     app = SimpleLayoutApplication(filename)
     app.run()
