@@ -44,16 +44,20 @@ class SimpleLayoutApplication:
             rect = MovingRectangle (int (float(line.strip())*1000) , self.width, self.height,timetoReachBottom=4000)
             self._objects.append (rect)
         
-        
+        f.close()
         # Deals with the spectrogram
-        y, sr = librosa.load(self.filename)
-        S = np.abs(librosa.stft(y))
-        arr = librosa.power_to_db(S**2)
-        self.transposed = [list(i) for i in zip(*arr)]
-        self.minimumVol = min(min(self.transposed))
-        self.maximumVol = max(max(self.transposed))-self.minimumVol
-
+        f = open(os.getcwd() + '/SpectroInfo/' + self.filename + '.csv', 'r')
+        reader = csv.reader(f)
+        self.transposed = []
         
+        for row in reader:
+            self.transposed.append([float(val) for val in row])
+        
+        self.minimumVol = float(min([min(l) for l in self.transposed]))
+        self.maximumVol = float(max([max(l) for l in self.transposed]))
+        print(self.maximumVol)
+        print(self.minimumVol)
+
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
         canvas_width = self._canvas.winfo_width()
         for obj in self._objects:
@@ -83,15 +87,14 @@ class SimpleLayoutApplication:
         framenumber = librosa.time_to_frames([currenttime/1000])
         
         currentmaximumvolume = max(self.transposed [framenumber[0]])
-        percentmaxvolume = int(100*((currentmaximumvolume-self.minimumVol)/self.maximumVol))
-        print ((currentmaximumvolume-self.minimumVol))
-        print (self.maximumVol)
-        #print (percentmaxvolume)
         
+
+        percentmaxvolume = int(100*((currentmaximumvolume-self.minimumVol)/(self.maximumVol-self.minimumVol)))
+        print("Percent: ", percentmaxvolume)
         if (percentmaxvolume > 100):
             print ("------------------------------------------")
         
-        self._canvas.configure (background = '#%02x%02x%02x' % (150, percentmaxvolume, percentmaxvolume))
+        self._canvas.configure (background = '#%02x%02x%02x' % (int(255*percentmaxvolume/100), int(255*(1-(percentmaxvolume/100))), 0))
         
         for anobject in self._objects:
             anobject.move(currenttime)
@@ -236,33 +239,33 @@ if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
     #filename = "test.mp3"
-    filename = "discord.mp3"
-    # For whatever reason, on betteranimation.py it can not play test2.py or test3.py, but can play test.py and other mp3 files.
-    # Currently investigating this.
+    filename = "lithium.flac"
     
     current_working_dir = os.getcwd()
     if not os.path.exists(current_working_dir + '/OnsetTimes/'):
         os.makedirs(current_working_dir + '/OnsetTimes/')
-    '''
+    
     if not os.path.exists(current_working_dir + '/SpectroInfo/'):
         os.makedirs(current_working_dir + '/SpectroInfo/')
-    '''
+    
     if not os.path.exists(current_working_dir + '/OnsetTimes/' + filename + '.csv'):
         y, sr = librosa.load(filename)
         onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
         onset_times = librosa.frames_to_time(onset_frames, sr=sr) 
         librosa.output.times_csv(current_working_dir + '/OnsetTimes/' + filename +'.csv', onset_times)
-    '''
+    
     if not os.path.exists(current_working_dir + '/SpectroInfo/'+filename+'.csv'):
         y, sr = librosa.load (filename)
         S = np.abs (librosa.stft(y))
         
         arr = librosa.power_to_db(S**2)
         transposearr = [list(i) for i in zip(*arr)]
-        
-        
-        os.makedirs(current_working_dir + '/SpectroInfo/')
-    '''
-    print('Starting to run the gui')
+
+        with open(current_working_dir + '/SpectroInfo/'+filename+'.csv', "w") as f:
+            writer = csv.writer(f)
+            writer.writerows(transposearr)
+
+
+    print("Running gui")
     app = SimpleLayoutApplication(filename)
     app.run()
