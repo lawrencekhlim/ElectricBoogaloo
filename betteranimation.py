@@ -21,7 +21,7 @@ class SimpleLayoutApplication:
         self._root_window = tkinter.Tk()
 
         self._canvas = tkinter.Canvas(
-            master = self._root_window,width = self.width, height=self.height, background = 'yellow')
+            master = self._root_window,width = self.width, height=self.height, background = '#%02x%02x%02x' % (127, 128, 0))
         #self._canvas.pack()
 
         self._canvas.grid(
@@ -54,9 +54,24 @@ class SimpleLayoutApplication:
             self.transposed.append([float(val) for val in row])
         
         self.minimumVol = float(min([min(l) for l in self.transposed]))
-        self.maximumVol = float(max([max(l) for l in self.transposed]))
+        self.maximumVol = float(max([max(l) for l in self.transposed])) - self.minimumVol
+        
+        self.averageVol = 0
+        noVolumeCount = 0
+        for row in self.transposed:
+            for val in row:
+                if val != self.minimumVol:
+                    self.averageVol += (val - self.minimumVol)
+                else:
+                    noVolumeCount += 1
+
+        self.averageVol /= (len(self.transposed)*1025 - noVolumeCount)
+        self.averageVol -= self.minimumVol
+        self.averagepercent = int(100*(self.averageVol-self.minimumVol)/self.maximumVol)
+
         print(self.maximumVol)
-        print(self.minimumVol)
+        print(self.averageVol)
+        print(self.averagepercent)
 
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
         canvas_width = self._canvas.winfo_width()
@@ -86,15 +101,21 @@ class SimpleLayoutApplication:
         print (currenttime)
         framenumber = librosa.time_to_frames([currenttime/1000])
         
-        currentmaximumvolume = max(self.transposed [framenumber[0]])
+        currentmaximumvolume = max(self.transposed [framenumber[0]]) - self.minimumVol
         
+        if currentmaximumvolume < self.averageVol:
+            percentmaxvolume = int(50*(currentmaximumvolume/self.averageVol))
+        else:
+            percentmaxvolume = int(50 + (50*((currentmaximumvolume-self.averageVol)/(self.maximumVol-self.averageVol))))
 
-        percentmaxvolume = int(100*((currentmaximumvolume-self.minimumVol)/(self.maximumVol-self.minimumVol)))
-        print("Percent: ", percentmaxvolume)
-        if (percentmaxvolume > 100):
-            print ("------------------------------------------")
+        rgb = int(255*(percentmaxvolume)/100)
+        if rgb < 0:
+            rgb = 0
         
-        self._canvas.configure (background = '#%02x%02x%02x' % (int(255*percentmaxvolume/100), int(255*(1-(percentmaxvolume/100))), 0))
+        print("Vol    :", currentmaximumvolume, self.averageVol)
+        print("Per Vol:", percentmaxvolume, "%", "RGB: (" + str(rgb) + ", " + str(255-rgb) + ", 0)")
+
+        self._canvas.configure (background = '#%02x%02x%02x' % (rgb, 255-rgb, 0))
         
         for anobject in self._objects:
             anobject.move(currenttime)
