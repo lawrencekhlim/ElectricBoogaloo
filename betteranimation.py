@@ -107,16 +107,20 @@ class SimpleLayoutApplication:
             percentmaxvolume = int(50*(currentmaximumvolume/self.averageVol))
         else:
             percentmaxvolume = int(50 + (50*((currentmaximumvolume-self.averageVol)/(self.maximumVol-self.averageVol))))
-
-        rgb = int(255*(percentmaxvolume)/100)
-        if rgb < 0:
-            rgb = 0
         
-        print("Vol    :", currentmaximumvolume, self.averageVol)
-        print("Per Vol:", percentmaxvolume, "%", "RGB: (" + str(rgb) + ", " + str(255-rgb) + ", 0)")
-
-        self._canvas.configure (background = '#%02x%02x%02x' % (rgb, 255-rgb, 0))
+        print("Vol    :", currentmaximumvolume)
+        print("Ave Vol:", self.averageVol)
+        print("Per Vol:", percentmaxvolume, "%")
         
+        if percentmaxvolume <= 50:
+            rgb = int(255*percentmaxvolume/50)
+            self._canvas.configure (background = '#%02x%02x%02x' % (rgb, 255, 0))
+            print("RGB    :", "(" + str(rgb) + ", " + str(rgb) + ", " + "0)")
+        else:
+            rgb = int(255*(percentmaxvolume-50)/50)
+            self._canvas.configure (background = '#%02x%02x%02x' % (255, 255-rgb, 0))
+            print("RGB    :", "(" + str(rgb) + ", " + str(255-rgb) + ", " + "0)")
+
         for anobject in self._objects:
             anobject.move(currenttime)
         
