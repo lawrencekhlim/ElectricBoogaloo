@@ -115,11 +115,11 @@ class SimpleLayoutApplication:
         if percentmaxvolume <= 50:
             rgb = int(255*percentmaxvolume/50)
             self._canvas.configure (background = '#%02x%02x%02x' % (rgb, 255, 0))
-            print("RGB    :", "(" + str(rgb) + ", " + str(rgb) + ", " + "0)")
+            print("RGB    :", "(" + str(rgb) + ", " + str(255) + ", " + "0)")
         else:
             rgb = int(255*(percentmaxvolume-50)/50)
             self._canvas.configure (background = '#%02x%02x%02x' % (255, 255-rgb, 0))
-            print("RGB    :", "(" + str(rgb) + ", " + str(255-rgb) + ", " + "0)")
+            print("RGB    :", "(" + str(255) + ", " + str(255-rgb) + ", " + "0)")
 
         for anobject in self._objects:
             anobject.move(currenttime)
