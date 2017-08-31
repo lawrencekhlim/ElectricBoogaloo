@@ -22,12 +22,14 @@ class SimpleLayoutApplication:
 
         self._canvas = tkinter.Canvas(
             master = self._root_window,width = self.width, height=self.height, background = '#%02x%02x%02x' % (127, 128, 0))
-        #self._canvas.pack()
+
+        self._pauseButton = tkinter.Button(text = 'Pause/Unpause', font = ('Comic Sans MS',20), command = self._on_pause_button_clicked)
 
         self._canvas.grid(
         row = 0, column = 0, padx = 5, pady = 5,
         sticky = tkinter.N + tkinter.S + tkinter.W + tkinter.E)
 
+        self._pauseButton.grid(row = 1, column = 0, sticky = tkinter.N + tkinter.S + tkinter.W + tkinter.E)
         self._canvas.bind('<Configure>', self._on_canvas_resized)
 
         self._root_window.rowconfigure(0, weight = 1)
@@ -78,8 +80,12 @@ class SimpleLayoutApplication:
         for obj in self._objects:
             obj.coordinates['botRightX'] = canvas_width
 
-        self.redrawAll() 
+        self.redrawAll()
 
+    def _on_pause_button_clicked(self) -> None:
+        print("--------------------------PAUSE PRESSED----------------------------------")
+        self.sounds.pause()
+    
     def run(self):
         self.sounds = Sound ()
         self.sounds.play_music (self.filename)
@@ -137,6 +143,9 @@ class SimpleLayoutApplication:
 
 
 class Sound:
+    def __init__(self):
+       self.isPaused = False
+    
     def play_music(self, music_file, volume=0.5):
         '''
             stream music with mixer.music module in a blocking manner
@@ -176,7 +185,14 @@ class Sound:
         pg.mixer.music.play(0)
         
         '''
-            
+    def pause(self):
+        if not self.isPaused:
+            pg.mixer.music.pause()
+            self.isPaused = True
+        else:
+            pg.mixer.music.unpause()
+            self.isPaused = False
+    
     def get_position (self):
         return pg.mixer.music.get_pos()
 
@@ -262,7 +278,6 @@ class MovingRectangle:
 
 if __name__ == '__main__':
     
-    #filename = "KoiNoShirushi.mp3"
     #filename = "test.mp3"
     filename = "lithium.flac"
     
