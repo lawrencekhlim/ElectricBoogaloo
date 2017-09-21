@@ -8,6 +8,58 @@ import csv
 
 class SimpleLayoutApplication:
 
+    def initOnset (self):
+        # All objects the canvas is animating
+        self._objects = []
+        
+        
+        self._times = []
+        f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
+        for line in f:
+            self._times.append(int(float(line.strip())*1000))
+            rect = MovingRectangle (int (float(line.strip())*1000) , self.width, self.height,timetoReachBottom=4000)
+            self._objects.append (rect)
+    
+        f.close()
+
+    def initSpectro (self):
+        #Deals with the spectrogram
+        f = open(os.getcwd() + '/SpectroInfo/' + self.filename + '.csv', 'r')
+        reader = csv.reader(f)
+        self.transposed = []
+        
+        for row in reader:
+            self.transposed.append([float(val) for val in row])
+
+        self.minimumVol = float(min([min(l) for l in self.transposed]))
+        self.maximumVol = float(max([max(l) for l in self.transposed])) - self.minimumVol
+        
+        self.averageVol = 0
+        noVolumeCount = 0
+        for row in self.transposed:
+            for val in row:
+                if val != self.minimumVol:
+                    self.averageVol += (val - self.minimumVol)
+                else:
+                    noVolumeCount += 1
+
+        self.averageVol /= (len(self.transposed)*1025 - noVolumeCount)
+        self.averageVol -= self.minimumVol
+        self.averagepercent = int(100*(self.averageVol-self.minimumVol)/self.maximumVol)
+        
+        print(self.maximumVol)
+        print(self.averageVol)
+        print(self.averagepercent)
+        f.close()
+
+    def initBeat (self):
+
+        self._beat_times = []
+        f = open(os.getcwd() + '/BeatInfo/' + self.filename + '.csv', 'r')
+        for line in f:
+            self._beat_times.append(int(float(line.strip())*1000))
+        
+        f.close()
 
     def __init__(self, filename):
         self.testdelay = 0
@@ -35,46 +87,13 @@ class SimpleLayoutApplication:
         self._root_window.rowconfigure(0, weight = 1)
         self._root_window.columnconfigure(0, weight = 1)
 
-        # All objects the canvas is animating
-        self._objects = []
-        
-        
-        self._times = []
-        f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
-        for line in f:
-            self._times.append(int(float(line.strip())*1000))
-            rect = MovingRectangle (int (float(line.strip())*1000) , self.width, self.height,timetoReachBottom=4000)
-            self._objects.append (rect)
-        
-        f.close()
-        # Deals with the spectrogram
-        f = open(os.getcwd() + '/SpectroInfo/' + self.filename + '.csv', 'r')
-        reader = csv.reader(f)
-        self.transposed = []
-        
-        for row in reader:
-            self.transposed.append([float(val) for val in row])
-        
-        self.minimumVol = float(min([min(l) for l in self.transposed]))
-        self.maximumVol = float(max([max(l) for l in self.transposed])) - self.minimumVol
-        
-        self.averageVol = 0
-        noVolumeCount = 0
-        for row in self.transposed:
-            for val in row:
-                if val != self.minimumVol:
-                    self.averageVol += (val - self.minimumVol)
-                else:
-                    noVolumeCount += 1
+        self.initOnset()
 
-        self.averageVol /= (len(self.transposed)*1025 - noVolumeCount)
-        self.averageVol -= self.minimumVol
-        self.averagepercent = int(100*(self.averageVol-self.minimumVol)/self.maximumVol)
-
-        print(self.maximumVol)
-        print(self.averageVol)
-        print(self.averagepercent)
-
+        self.initSpectro()
+    
+        self.initBeat()
+    
+    
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
         canvas_width = self._canvas.winfo_width()
         for obj in self._objects:
@@ -105,6 +124,24 @@ class SimpleLayoutApplication:
         currenttime = self.sounds.get_position()
         #currenttime = get_position()
         print (currenttime)
+        
+        self.updateBackground(currenttime)
+
+        for anobject in self._objects:
+            anobject.move(currenttime)
+        
+        self.redrawAll ()
+
+
+        #self._root_window.after (self.delay, self.timerFired)
+    
+    def redrawAll (self):
+        #self._canvas.delete("all")
+        
+        for object in self._objects:
+            object.draw(self._canvas)
+
+    def updateBackground (self, currenttime):
         framenumber = librosa.time_to_frames([currenttime/1000])
         
         currentmaximumvolume = max(self.transposed [framenumber[0]]) - self.minimumVol
@@ -120,26 +157,43 @@ class SimpleLayoutApplication:
         
         if percentmaxvolume <= 50:
             rgb = int(255*percentmaxvolume/50)
-            self._canvas.configure (background = '#%02x%02x%02x' % (rgb, 255, 0))
-            print("RGB    :", "(" + str(rgb) + ", " + str(255) + ", " + "0)")
+            rgbtuple = (rgb, 255, 0)
+            #self._canvas.configure (background = '#%02x%02x%02x' % (rgb, 255, 0))
+            #print("RGB    :", "(" + str(rgb) + ", " + str(255) + ", " + "0)")
         else:
             rgb = int(255*(percentmaxvolume-50)/50)
-            self._canvas.configure (background = '#%02x%02x%02x' % (255, 255-rgb, 0))
-            print("RGB    :", "(" + str(255) + ", " + str(255-rgb) + ", " + "0)")
-
-        for anobject in self._objects:
-            anobject.move(currenttime)
+            rgbtuple = (255, 255-rgb, 0)
+            #  self._canvas.configure (background = '#%02x%02x%02x' % (255, 255-rgb, 0))
+            #print("RGB    :", "(" + str(255) + ", " + str(255-rgb) + ", " + "0)")
         
-        self.redrawAll ()
-
-         
-        #self._root_window.after (self.delay, self.timerFired)
-    
-    def redrawAll (self):
-        #self._canvas.delete("all")
+        closebeat = self.getClosestBeats (currenttime)
+        percentage = self.scaleBetween (self.getPercentCloseToBeat(currenttime, closebeat), 0.6, 1)
         
-        for object in self._objects:
-            object.draw(self._canvas)
+        #rgbtuple = (255,0,0)
+        rgbtuple = (int (rgbtuple[0]*percentage), int (rgbtuple [1] * percentage), int (rgbtuple[2]*percentage))
+        
+        self._canvas.configure (background = '#%02x%02x%02x' % (rgbtuple))
+
+    def getClosestBeats (self, currenttime):
+        i = 1
+        arr = []
+        while i < len(self._beat_times) and self._beat_times[i] < currenttime:
+            i+=1
+        if not (i < len (self._beat_times)):
+            i-=1
+        arr.append(self._beat_times[i-1])
+        arr.append(self._beat_times[i])
+        return arr
+
+    def getPercentCloseToBeat (self, currenttime, closebeats):
+        #halftime = (closebeats [1] - closebeats[0])/2
+        halftime = (closebeats [1] - closebeats[0])
+        return 1- np.abs(((currenttime-closebeats[0])%halftime)/halftime)
+        #return np.abs(((currenttime-closebeats[0])%halftime)/halftime)
+
+    def scaleBetween (self,percent, smaller, larger):
+        diff = larger-smaller
+        return smaller + diff * percent
 
 
 class Sound:
@@ -278,6 +332,7 @@ class MovingRectangle:
 
 if __name__ == '__main__':
     
+    #filename = "KoiNoShirushi.mp3"
     #filename = "test.mp3"
     filename = "lithium.flac"
     
@@ -287,7 +342,11 @@ if __name__ == '__main__':
     
     if not os.path.exists(current_working_dir + '/SpectroInfo/'):
         os.makedirs(current_working_dir + '/SpectroInfo/')
-    
+
+    if not os.path.exists(current_working_dir + '/BeatInfo/'):
+        os.makedirs(current_working_dir + '/BeatInfo/')
+
+
     if not os.path.exists(current_working_dir + '/OnsetTimes/' + filename + '.csv'):
         y, sr = librosa.load(filename)
         onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
@@ -304,6 +363,12 @@ if __name__ == '__main__':
         with open(current_working_dir + '/SpectroInfo/'+filename+'.csv', "w") as f:
             writer = csv.writer(f)
             writer.writerows(transposearr)
+
+    if not os.path.exists(current_working_dir + '/BeatInfo/'+filename+'.csv'):
+        y, sr = librosa.load (filename)
+        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
+        beat_times = librosa.frames_to_time(beat_frames, sr=sr)
+        librosa.output.times_csv(current_working_dir + '/BeatInfo/' + filename +'.csv', beat_times)
 
 
     print("Running gui")
