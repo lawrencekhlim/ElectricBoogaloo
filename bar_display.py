@@ -98,7 +98,7 @@ class SimpleLayoutApplication:
         
         currenttime = self.sounds.get_position()
         #currenttime = get_position()
-        print (currenttime)
+        #print (currenttime)
         framenumber = librosa.time_to_frames([currenttime/1000]) [0]
         print (framenumber)
         print(len(self.transposed))
@@ -108,6 +108,9 @@ class SimpleLayoutApplication:
         for anobject in self._objects:
             startindex = samplesize*anobject.get_frequency_num()
             endindex = samplesize*anobject.get_frequency_num()+samplesize
+            
+            if (endindex >= len (self.transposed[framenumber])):
+                endindex = len(self.transposed [framenumber])-1
             sum = 0
             for i in range (startindex, endindex):
                 sum += self.transposed [framenumber][i]
