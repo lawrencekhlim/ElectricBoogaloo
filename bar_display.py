@@ -62,27 +62,9 @@ class SimpleLayoutApplication:
         
         for row in reader:
             self.transposed.append([float(val) for val in row])
-        self.minimumVol = float(min([min(l) for l in self.transposed]))
-        self.maximumVol = float(max([max(l) for l in self.transposed])) - self.minimumVol
         
         print(len(self.transposed[0]))
         
-        self.averageVol = 0
-        noVolumeCount = 0
-        for row in self.transposed:
-            for val in row:
-                if val != self.minimumVol:
-                    self.averageVol += (val - self.minimumVol)
-                else:
-                    noVolumeCount += 1
-
-        self.averageVol /= (len(self.transposed)*1025 - noVolumeCount)
-        self.averageVol -= self.minimumVol
-        self.averagepercent = int(100*(self.averageVol-self.minimumVol)/self.maximumVol)
-
-        print(self.maximumVol)
-        print(self.averageVol)
-        print(self.averagepercent)
 
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
         canvas_width = self._canvas.winfo_width()
@@ -117,26 +99,6 @@ class SimpleLayoutApplication:
         print (currenttime)
         framenumber = librosa.time_to_frames([currenttime/1000])
         
-        currentmaximumvolume = max(self.transposed [framenumber[0]]) - self.minimumVol
-        
-        if currentmaximumvolume < self.averageVol:
-            percentmaxvolume = int(50*(currentmaximumvolume/self.averageVol))
-        else:
-            percentmaxvolume = int(50 + (50*((currentmaximumvolume-self.averageVol)/(self.maximumVol-self.averageVol))))
-        
-        print("Vol    :", currentmaximumvolume)
-        print("Ave Vol:", self.averageVol)
-        print("Per Vol:", percentmaxvolume, "%")
-        
-        if percentmaxvolume <= 50:
-            rgb = int(255*percentmaxvolume/50)
-            self._canvas.configure (background = '#%02x%02x%02x' % (rgb, 255, 0))
-            print("RGB    :", "(" + str(rgb) + ", " + str(255) + ", " + "0)")
-        else:
-            rgb = int(255*(percentmaxvolume-50)/50)
-            self._canvas.configure (background = '#%02x%02x%02x' % (255, 255-rgb, 0))
-            print("RGB    :", "(" + str(255) + ", " + str(255-rgb) + ", " + "0)")
-
         for anobject in self._objects:
             anobject.move(currenttime)
         
@@ -178,23 +140,7 @@ class Sound:
             print("File {} not found! ({})".format(music_file, pg.get_error()))
             return
         pg.mixer.music.play(0)
-        '''
-        if not pg.mixer.music.get_busy():
-            # check if playback has finished
-            pg.mixer.music.play(0)
-        '''
-        '''
-        pg.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
-    
-        pg.init()
 
-        pg.mixer.init()
-    
-        pg.mixer.music.load(music_file)
-    
-        pg.mixer.music.play(0)
-        
-        '''
     def pause(self):
         if not self.isPaused:
             pg.mixer.music.pause()
@@ -209,28 +155,6 @@ class Sound:
     def isBusy(self):
         return pg.mixer.music.get_busy()
 
-'''
-    I am testing why some mp3 files work and others not with the following commented out code.
-
-'''
-'''
-def play_music(music_file, volume=0.8):
-    pg.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
-    
-    pg.init()
-    
-    pg.mixer.init()
-    
-    pg.mixer.music.load(music_file)
-    
-    pg.mixer.music.play(0)
-
-def get_position ():
-    return pg.mixer.music.get_pos()
-
-def isBusy():
-    return pg.mixer.music.get_busy()
-'''
 
 
 class MovingRectangle:
@@ -288,21 +212,14 @@ class MovingRectangle:
 
 if __name__ == '__main__':
     
-    #filename = "test.mp3"
-    filename = "lithium.flac"
+    filename = "test.mp3"
+    #filename = "lithium.flac"
     
     current_working_dir = os.getcwd()
-    if not os.path.exists(current_working_dir + '/OnsetTimes/'):
-        os.makedirs(current_working_dir + '/OnsetTimes/')
+
     
     if not os.path.exists(current_working_dir + '/SpectroInfo/'):
         os.makedirs(current_working_dir + '/SpectroInfo/')
-    
-    if not os.path.exists(current_working_dir + '/OnsetTimes/' + filename + '.csv'):
-        y, sr = librosa.load(filename)
-        onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
-        onset_times = librosa.frames_to_time(onset_frames, sr=sr) 
-        librosa.output.times_csv(current_working_dir + '/OnsetTimes/' + filename +'.csv', onset_times)
     
     if not os.path.exists(current_working_dir + '/SpectroInfo/'+filename+'.csv'):
         y, sr = librosa.load (filename)
