@@ -157,48 +157,22 @@ class Sound:
 
 
 
-class MovingRectangle:
-    def __init__ (self, endtime, canvaswidth, canvasheight, timetoReachBottom=1000):
-        self.coordinates = {}
-        self.coordinates ['topLeftX'] = 0
-        self.coordinates ['topLeftY'] = 0
-        self.coordinates ['botRightX'] = 2
-        self.coordinates ['botRightY'] = canvaswidth
-        
+class SmallerRectangle:
+    def __init__ (self, canvaswidth, canvasheight, frequencynum, volume, maxvolume):
+        self.frequencynum = frequencynum
         self.canvaswidth = canvaswidth
         self.canvasheight = canvasheight
-        
-        self.visibility = False
+        self.maxvolume = maxvolume
+        self.currentvolume = volume
         
         self.color = 'blue'
-        self.timeToReachBottom = timetoReachBottom
-    
-        self.endVisibility = endtime # In milliseconds
-        self.startVisibility = endtime - timetoReachBottom # In millliseconds
-    
-        
-    def setVisibility (self, flag):
-        self.visibility = flag
-    
 
-    def move (self, currenttime):
-        
-        if (self.endVisibility-currenttime > self.timeToReachBottom or self.endVisibility-currenttime < 0):
-            self.setVisibility(False)
-        else:
-            #print ("I am visible!")
-            
-            self.setVisibility (True)
-            self.coordinates ['topLeftX'] = self.coordinates ['topLeftX']
-            self.coordinates ['botRightX'] = self.coordinates ['botRightX']
-        
-        
-            self.coordinates ['topLeftY'] = self.canvasheight - self.canvasheight * (self.endVisibility-currenttime)/self.timeToReachBottom
-            self.coordinates ['botRightY'] = self.coordinates ['topLeftY'] + 2
-    
+    def update(canvas, volume):    
+        self.currentvolume = volume
+        self.draw(canvas)
+
     def draw (self, canvas):
-        if (self.visibility):
-            canvas.create_rectangle(self.coordinates['topLeftX'], self.coordinates ['topLeftY'], self.coordinates['botRightX'], self.coordinates ['botRightY'], fill=self.color)
+        canvas.create_rectangle(self.canvaswidth*self.frequencynum/1025, self.canvasheight/2, self,canvaswidth*self.frequency_num/1025, (self.canvasheight/2)+(self.canvasheight/2)*(self.currentvolume/self.maxvolume), fill=self.color)
     
 
         
