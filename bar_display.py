@@ -104,11 +104,11 @@ class SimpleLayoutApplication:
         samplesize = len ( self.transposed [framenumber] )
         
         for anobject in self._objects:
-            startindex = samplesize*anobject (frequencynum)
-            endindex = samplesize*anobject(frequencynum)+samplesize
+            startindex = samplesize*anobject.get_frequency_num()
+            endindex = samplesize*anobject.get_frequency_num()+samplesize
             sum = 0
             for i in range (startindex, endindex):
-                sum += self.transpoded [framenumber][i]
+                sum += self.transposed [framenumber][i]
             ave = sum / (endindex-startindex) - self.minimumVol
             
             
@@ -183,7 +183,7 @@ class SmallerRectangle:
         self.y2 = self.y1 + (self.currentvolume /self.maxvolume) * self.maxheight
         self.color = 'blue'
 
-    def update(volume):
+    def update(self, volume):
         self.currentvolume = volume
         self.y2 = self.y1 + self.maxheight*(self.currentvolume/self.maxvolume)
 
