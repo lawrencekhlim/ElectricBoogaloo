@@ -160,19 +160,25 @@ class Sound:
 class SmallerRectangle:
     def __init__ (self, canvaswidth, canvasheight, frequencynum, volume, maxvolume):
         self.frequencynum = frequencynum
-        self.canvaswidth = canvaswidth
-        self.canvasheight = canvasheight
+        self.width = canvaswidth
+        self.height = canvasheight
         self.maxvolume = maxvolume
         self.currentvolume = volume
-        
+
+        self.x1 = self.width*self.frequencynum/1025
+        self.y1 = self.height/2
+        self.x2 = self.width*self.frequencynum/1025
+        self.y2 = (self.height/2)+(self.height/2)*(self.currentvolume/self.maxvolume)
+
         self.color = 'blue'
 
     def update(canvas, volume):    
         self.currentvolume = volume
+        self.y2 = (self.height/2)+(self.height/2)*(self.currentvolume/self.maxvolume)
         self.draw(canvas)
 
     def draw (self, canvas):
-        canvas.create_rectangle(self.canvaswidth*self.frequencynum/1025, self.canvasheight/2, self,canvaswidth*self.frequency_num/1025, (self.canvasheight/2)+(self.canvasheight/2)*(self.currentvolume/self.maxvolume), fill=self.color)
+        canvas.create_rectangle(self.x1, self.y1, self.x2, self.y2, fill=self.color)
     
 
         
