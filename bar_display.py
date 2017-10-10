@@ -43,18 +43,7 @@ class SimpleLayoutApplication:
         self._root_window.rowconfigure(0, weight = 1)
         self._root_window.columnconfigure(0, weight = 1)
 
-        # All objects the canvas is animating
-        self._objects = []
-        
-        
-        self._times = []
-        f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
-        for line in f:
-            self._times.append(int(float(line.strip())*1000))
-            rect = MovingRectangle (int (float(line.strip())*1000) , self.width, self.height,timetoReachBottom=4000)
-            self._objects.append (rect)
-        
-        f.close()
+
         # Deals with the spectrogram
         f = open(os.getcwd() + '/SpectroInfo/' + self.filename + '.csv', 'r')
         reader = csv.reader(f)
@@ -62,9 +51,22 @@ class SimpleLayoutApplication:
         
         for row in reader:
             self.transposed.append([float(val) for val in row])
+        f.close()
         
+        self.minimumVol = float(min([min(l) for l in self.transposed]))
+        self.maximumVol = float(max([max(l) for l in self.transposed])) - self.minimumVol
         print(len(self.transposed[0]))
         
+        # All objects the canvas is animating
+        self._num_objects = 2
+        self._objects = []
+        length = self.width/self._num_objects
+        for i in range (0, _num_objects):
+            maxheight = self.height
+            xTopLeft = length*i
+            yTopLeft = 0
+            
+            self._objects.append (SmallerRectangle (xTopLeft, yTopLeft, length, maxheight, i, self.maximumVol))
 
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
         canvas_width = self._canvas.winfo_width()
@@ -100,7 +102,7 @@ class SimpleLayoutApplication:
         framenumber = librosa.time_to_frames([currenttime/1000])
         
         for anobject in self._objects:
-            anobject.move(currenttime)
+            anobject.update(currenttime)
         
         self.redrawAll ()
 
@@ -158,24 +160,22 @@ class Sound:
 
 
 class SmallerRectangle:
-    def __init__ (self, canvaswidth, canvasheight, frequencynum, volume, maxvolume):
+    def __init__ (self, xTopLeft, yTopLeft, width, canvasheight frequencynum, maxvolume):
         self.frequencynum = frequencynum
         self.width = canvaswidth
         self.height = canvasheight
         self.maxvolume = maxvolume
-        self.currentvolume = volume
-
-        self.x1 = self.width*self.frequencynum/1025
-        self.y1 = self.height/2
-        self.x2 = self.width*self.frequencynum/1025
-        self.y2 = (self.height/2)+(self.height/2)*(self.currentvolume/self.maxvolume)
-
+        self.currentvolume = 0
+        
+        self.x1 = xTopLeft
+        self.y1 = yTopLeft
+        self.x2 = self.x1+width
+        self.y2 = self.y1 + (self.currentvolume /self.maxvolume) * self.canvasheight;=
         self.color = 'blue'
 
-    def update(canvas, volume):    
+    def update(volume):    
         self.currentvolume = volume
-        self.y2 = (self.height/2)+(self.height/2)*(self.currentvolume/self.maxvolume)
-        self.draw(canvas)
+        self.y2 = self.y1 + self.currentvolume*(self.currentvolume/self.maxvolume)
 
     def draw (self, canvas):
         canvas.create_rectangle(self.x1, self.y1, self.x2, self.y2, fill=self.color)
