@@ -55,7 +55,7 @@ class SimpleLayoutApplication:
         
         self.minimumVol = float(min([min(l) for l in self.transposed]))
         self.maximumVol = float(max([max(l) for l in self.transposed])) - self.minimumVol
-        print(len(self.transposed[0]))
+        print(len(self.transposed))
         
         # All objects the canvas is animating
         self._num_objects = 2
@@ -99,7 +99,9 @@ class SimpleLayoutApplication:
         currenttime = self.sounds.get_position()
         #currenttime = get_position()
         print (currenttime)
-        framenumber = librosa.time_to_frames([currenttime/1000])
+        framenumber = librosa.time_to_frames([currenttime/1000]) [0]
+        print (framenumber)
+        print(len(self.transposed))
         
         samplesize = len ( self.transposed [framenumber] )
         
