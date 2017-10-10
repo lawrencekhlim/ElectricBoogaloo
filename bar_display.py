@@ -58,7 +58,7 @@ class SimpleLayoutApplication:
         print(len(self.transposed))
         
         # All objects the canvas is animating
-        self._num_objects = 2
+        self._num_objects = 3
         self._objects = []
         length = self.width/self._num_objects
         for i in range (0, self._num_objects):
@@ -103,11 +103,11 @@ class SimpleLayoutApplication:
         print (framenumber)
         print(len(self.transposed))
         
-        samplesize = len ( self.transposed [framenumber] )
+        samplesize = len ( self.transposed [framenumber] ) / self._num_objects
         
         for anobject in self._objects:
-            startindex = samplesize*anobject.get_frequency_num()
-            endindex = samplesize*anobject.get_frequency_num()+samplesize
+            startindex = int(samplesize*anobject.get_frequency_num())
+            endindex = int(samplesize*anobject.get_frequency_num()+samplesize)
             
             if (endindex >= len (self.transposed[framenumber])):
                 endindex = len(self.transposed [framenumber])-1
