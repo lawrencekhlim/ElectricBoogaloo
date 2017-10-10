@@ -61,7 +61,7 @@ class SimpleLayoutApplication:
         self._num_objects = 2
         self._objects = []
         length = self.width/self._num_objects
-        for i in range (0, _num_objects):
+        for i in range (0, self._num_objects):
             maxheight = self.height
             xTopLeft = length*i
             yTopLeft = 0
@@ -101,8 +101,18 @@ class SimpleLayoutApplication:
         print (currenttime)
         framenumber = librosa.time_to_frames([currenttime/1000])
         
+        samplesize = len ( self.transposed [framenumber] )
+        
         for anobject in self._objects:
-            anobject.update(currenttime)
+            startindex = samplesize*anobject (frequencynum)
+            endindex = samplesize*anobject(frequencynum)+samplesize
+            sum = 0
+            for i in range (startindex, endindex):
+                sum += self.transpoded [framenumber][i]
+            ave = sum / (endindex-startindex) - self.minimumVol
+            
+            
+            anobject.update(ave)
         
         self.redrawAll ()
 
@@ -160,25 +170,28 @@ class Sound:
 
 
 class SmallerRectangle:
-    def __init__ (self, xTopLeft, yTopLeft, width, canvasheight frequencynum, maxvolume):
+    def __init__ (self, xTopLeft, yTopLeft, width, canvasheight, frequencynum, maxvolume):
         self.frequencynum = frequencynum
-        self.width = canvaswidth
-        self.height = canvasheight
+        self.width = width
+        self.maxheight = canvasheight
         self.maxvolume = maxvolume
         self.currentvolume = 0
         
         self.x1 = xTopLeft
         self.y1 = yTopLeft
         self.x2 = self.x1+width
-        self.y2 = self.y1 + (self.currentvolume /self.maxvolume) * self.canvasheight;=
+        self.y2 = self.y1 + (self.currentvolume /self.maxvolume) * self.maxheight
         self.color = 'blue'
 
-    def update(volume):    
+    def update(volume):
         self.currentvolume = volume
-        self.y2 = self.y1 + self.currentvolume*(self.currentvolume/self.maxvolume)
+        self.y2 = self.y1 + self.maxheight*(self.currentvolume/self.maxvolume)
 
     def draw (self, canvas):
         canvas.create_rectangle(self.x1, self.y1, self.x2, self.y2, fill=self.color)
+
+    def get_frequency_num (self):
+        return self.frequencynum
     
 
         
