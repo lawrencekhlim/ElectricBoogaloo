@@ -21,6 +21,12 @@ class SimpleLayoutApplication:
             self._objects.append (rect)
     
         f.close()
+    
+    def setOnsetWidths(self):
+        pass
+
+    def partitionFrequencies(self):
+        pass
 
     def initSpectro (self):
         #Deals with the spectrogram
@@ -62,6 +68,8 @@ class SimpleLayoutApplication:
         f.close()
 
     def __init__(self, filename):
+        self.rails = 4
+        
         self.testdelay = 0
         
         self.filename = filename
@@ -87,10 +95,12 @@ class SimpleLayoutApplication:
         self._root_window.rowconfigure(0, weight = 1)
         self._root_window.columnconfigure(0, weight = 1)
 
+        self.initSpectro()
+
+
         self.initOnset()
 
-        self.initSpectro()
-    
+
         self.initBeat()
     
     
@@ -295,7 +305,12 @@ class MovingRectangle:
             canvas.create_rectangle(self.coordinates['topLeftX'], self.coordinates ['topLeftY'], self.coordinates['botRightX'], self.coordinates ['botRightY'], fill=self.color)
     
 
-        
+class Rail:
+    def __init__(self):
+        onset_times = []
+
+    def chooseRail(self, times):
+        pass
 
 
 
