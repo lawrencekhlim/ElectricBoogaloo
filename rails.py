@@ -26,7 +26,8 @@ class SimpleLayoutApplication:
         pass
 
     def partitionFrequencies(self):
-        pass
+        for i in range (0, self.num_rails):
+            self.rails (Rail ( ))#stub
 
     def initSpectro (self):
         #Deals with the spectrogram
@@ -68,7 +69,8 @@ class SimpleLayoutApplication:
         f.close()
 
     def __init__(self, filename):
-        self.rails = 4
+        self.num_rails = 4
+        self.rails = []
         
         self.testdelay = 0
         
@@ -306,13 +308,17 @@ class MovingRectangle:
     
 
 class Rail:
-    def __init__(self):
+    def __init__(self, startFrequency, endFrequency, startX, width):
         onset_times = []
 
-    def chooseRail(self, times):
+    def addRectangle (self, onset):
+        return Rectangle # stub
+    
+    def moveRectangles (self):
         pass
-
-
+    
+    def drawRectangles (self):
+        pass
 
 
 
