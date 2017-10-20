@@ -26,7 +26,19 @@ class SimpleLayoutApplication:
         # This function is called inside initOnset, and requires and onset
         # time and chooses which Rail(s) to add a rectangle to,
         # It needs to pick which Rail, and call the addRectangle function
-        pass
+        
+        framenumber = librosa.time_to_frames([currenttime/1000]) [0]
+
+        for rail in self._rails:
+            total = 0
+            ave = 0
+            startFreq, endFreq = rail.getFrequencyRange()
+            total += self.transposed[framenumber][startFreq:endFreq]
+            ave = total/(endFreq-startFreq)
+
+            if ave > rail.getMedianVolume:
+                rail.addRectangle(onset)
+    
 
 
     def partitionFrequencies(self):
@@ -41,7 +53,7 @@ class SimpleLayoutApplication:
         
         rect_width = (int)(self.width/self.num_rails)
         for i in range (0, self.num_rails):
-            self._rails.append (Rail (i*frequency_length, i*frequency_length+frequency_length, i*rect_width, i*rect_width+rect_width, self.height, 4000))
+            self._rails.append (Rail (i*frequency_length, i*frequency_length+frequency_length, i*rect_width, rect_width, self.height, 4000))
             self._rails[i].calculateMedianVolume (self.transposed)
 
 
@@ -328,8 +340,14 @@ class Rail:
         rectangles = []
     
     def calculateMedianVolume (self, spectroArray):
-        self.medianVol = 0 # STUB
-    
+        total = 0
+        frequencies = 0
+        
+        for frame in spectroArray:
+            total += sum(frame)
+            frequencies += len(frame)
+        
+        self.medianVol = total/frequencies
     
     def addRectangle (self, onset):
         rectangles.append(MovingRectangle (onset, self.startX, self.width, self.canvasheight, self.timeToReachBottom))
@@ -357,8 +375,8 @@ class Rail:
 
 if __name__ == '__main__':
     
-    filename = "KoiNoShirushi.mp3"
-    #filename = "test.mp3"
+    #filename = "KoiNoShirushi.mp3"
+    filename = "test.mp3"
     #filename = "lithium.flac"
     
     current_working_dir = os.getcwd()
