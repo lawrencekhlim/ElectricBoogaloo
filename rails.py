@@ -10,7 +10,7 @@ class SimpleLayoutApplication:
 
     def initOnset (self):
         # All objects the canvas is animating
-        self._objects = []
+        self._rails = []
         
         
         self._times = []
@@ -18,7 +18,7 @@ class SimpleLayoutApplication:
         for line in f:
             self._times.append(int(float(line.strip())*1000))
             rect = MovingRectangle (int (float(line.strip())*1000) , 0, self.width, self.height,timetoReachBottom=4000)
-            self._objects.append (rect)
+            self._rails.append (rect)
     
         f.close()
     
@@ -27,7 +27,10 @@ class SimpleLayoutApplication:
 
     def partitionFrequencies(self):
         for i in range (0, self.num_rails):
-            self.rails (Rail ( ))#stub
+            self._rails (Rail ( ))#stub
+
+
+
 
     def initSpectro (self):
         #Deals with the spectrogram
@@ -107,11 +110,15 @@ class SimpleLayoutApplication:
     
     
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
+        '''
         canvas_width = self._canvas.winfo_width()
-        for obj in self._objects:
+        for obj in self._rails:
             obj.coordinates['botRightX'] = canvas_width
 
         self.redrawAll()
+        '''
+        pass
+    
 
     def _on_pause_button_clicked(self) -> None:
         print("--------------------------PAUSE PRESSED----------------------------------")
@@ -139,8 +146,8 @@ class SimpleLayoutApplication:
         
         self.updateBackground(currenttime)
 
-        for anobject in self._objects:
-            anobject.move(currenttime)
+        for rail in self._rails:
+            rail.moveRectangles(currenttime)
         
         self.redrawAll ()
 
@@ -150,8 +157,8 @@ class SimpleLayoutApplication:
     def redrawAll (self):
         #self._canvas.delete("all")
         
-        for object in self._objects:
-            object.draw(self._canvas)
+        for rail in self._rails:
+            rail.drawRectangles(self._canvas)
 
     def updateBackground (self, currenttime):
         framenumber = librosa.time_to_frames([currenttime/1000])
