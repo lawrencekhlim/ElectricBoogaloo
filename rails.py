@@ -22,12 +22,22 @@ class SimpleLayoutApplication:
     
         f.close()
     
-    def setOnsetWidths(self):
+    def addOnsetToRail(self, onset):
+        # This function is called inside initOnset, and requires and onset
+        # time and chooses which Rail(s) to add a rectangle to,
+        # It needs to pick which Rail, and call the addRectangle function
         pass
 
+
     def partitionFrequencies(self):
+        # This function is called inside initSpectro
+        # It initializes each of the rails arrays with the correct parameters
+        # The parameters it needs to calculate are:
+        # width and x position
+        # equally divided frequency ranges
+        
         for i in range (0, self.num_rails):
-            self._rails (Rail ( ))#stub
+            self._rails.append (Rail ( ))#stub
 
 
 
@@ -298,17 +308,21 @@ class MovingRectangle:
     
 
 class Rail:
-    def __init__(self, startFrequency, endFrequency, medianVol, startX, width, canvasheight, timeToReachBottom):
-        self.startFrequency = startFrequency
+    def __init__(self, startFrequency, endFrequency, startX, width, canvasheight, timeToReachBottom):
+        self.startFrequency = startFrequency # Index values of the array
         self.endFrequency = endFrequency
-        self.medianVol = medianVol
+        self.medianVol = 0
         self.startX = startX
         self.width = width
         self.canvasheight = canvasheight
         self.timeToReachBottom = timeToReachBottom
         
         rectangles = []
-
+    
+    def calculateMedianVolume (self, spectroArray):
+        self.medianVol = 0 # STUB
+    
+    
     def addRectangle (self, onset):
         rectangles.append(MovingRectangle (onset, self.startX, self.width, self.canvasheight, self.timeToReachBottom))
     
@@ -320,8 +334,12 @@ class Rail:
         for i in range (0, len (rectangles)):
             rectangles [i].draw (canvas)
 
-    def get_median_Volume (self):
+    def getMedianVolume (self):
         return self.medianVol
+    
+    def getFrequencyRange (self):
+        return (startFrequency, endFrequency)
+
 
 
 
