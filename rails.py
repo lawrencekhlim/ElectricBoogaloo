@@ -17,7 +17,7 @@ class SimpleLayoutApplication:
         f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
         for line in f:
             self._times.append(int(float(line.strip())*1000))
-            rect = MovingRectangle (int (float(line.strip())*1000) , self.width, self.height,timetoReachBottom=4000)
+            rect = MovingRectangle (int (float(line.strip())*1000) , 0, self.width, self.height,timetoReachBottom=4000)
             self._objects.append (rect)
     
         f.close()
@@ -253,43 +253,18 @@ class Sound:
     def isBusy(self):
         return pg.mixer.music.get_busy()
 
-'''
-    I am testing why some mp3 files work and others not with the following commented out code.
-
-'''
-'''
-def play_music(music_file, volume=0.8):
-    pg.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
-    
-    pg.init()
-    
-    pg.mixer.init()
-    
-    pg.mixer.music.load(music_file)
-    
-    pg.mixer.music.play(0)
-
-def get_position ():
-    return pg.mixer.music.get_pos()
-
-def isBusy():
-    return pg.mixer.music.get_busy()
-'''
-
-
 class MovingRectangle:
-    def __init__ (self, endtime, canvaswidth, canvasheight, timetoReachBottom=1000):
+    def __init__ (self, endtime, startingX, width, canvasheight, timetoReachBottom=1000):
         self.coordinates = {}
-        self.coordinates ['topLeftX'] = 0
+        self.coordinates ['topLeftX'] = startingX
         self.coordinates ['topLeftY'] = 0
-        self.coordinates ['botRightX'] = 2
+        self.coordinates ['botRightX'] = width+startingX
         self.coordinates ['botRightY'] = canvaswidth
         
         self.canvaswidth = canvaswidth
         self.canvasheight = canvasheight
         
         self.visibility = False
-        
         self.color = 'blue'
         self.timeToReachBottom = timetoReachBottom
     
