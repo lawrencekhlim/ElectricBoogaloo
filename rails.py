@@ -234,23 +234,6 @@ class Sound:
             print("File {} not found! ({})".format(music_file, pg.get_error()))
             return
         pg.mixer.music.play(0)
-        '''
-        if not pg.mixer.music.get_busy():
-            # check if playback has finished
-            pg.mixer.music.play(0)
-        '''
-        '''
-        pg.mixer.pre_init(44100, -16, 2, 2048) # setup mixer to avoid sound lag
-    
-        pg.init()
-
-        pg.mixer.init()
-    
-        pg.mixer.music.load(music_file)
-    
-        pg.mixer.music.play(0)
-        
-        '''
     def pause(self):
         if not self.isPaused:
             pg.mixer.music.pause()
@@ -308,17 +291,31 @@ class MovingRectangle:
     
 
 class Rail:
-    def __init__(self, startFrequency, endFrequency, startX, width):
-        onset_times = []
+    def __init__(self, startFrequency, endFrequency, medianVol, startX, width, canvasheight, timeToReachBottom):
+        self.startFrequency = startFrequency
+        self.endFrequency = endFrequency
+        self.medianVol = medianVol
+        self.startX = startX
+        self.width = width
+        self.canvasheight = canvasheight
+        self.timeToReachBottom = timeToReachBottom
+        
+        rectangles = []
 
     def addRectangle (self, onset):
-        return Rectangle # stub
+        rectangles.append(MovingRectangle (onset, self.startX, self.width, self.canvasheight, self.timeToReachBottom))
     
-    def moveRectangles (self):
-        pass
+    def moveRectangles (self, currenttime):
+        for i in range (0, len (rectangles)):
+            rectangles [i].move (currenttime)
     
-    def drawRectangles (self):
-        pass
+    def drawRectangles (self, canvas):
+        for i in range (0, len (rectangles)):
+            rectangles [i].draw (canvas)
+
+    def get_median_Volume (self):
+        return self.medianVol
+
 
 
 
