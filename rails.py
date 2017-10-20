@@ -35,10 +35,14 @@ class SimpleLayoutApplication:
         # The parameters it needs to calculate are:
         # width and x position
         # equally divided frequency ranges
+        self.frequency_range = len (self.transposed [0])
         
+        frequency_length = (int)(self.frequency_range/self.num_rails)
+        
+        rect_width = (int)(self.width/self.num_rails)
         for i in range (0, self.num_rails):
-            self._rails.append (Rail ( ))#stub
-
+            self._rails.append (Rail (i*frequency_length, i*frequency_length+frequency_length, i*rect_width, i*rect_width+rect_width, self.height, 4000))
+            self._rails[i].calculateMedianVolume (self.transposed)
 
 
 
@@ -71,6 +75,10 @@ class SimpleLayoutApplication:
         print(self.averageVol)
         print(self.averagepercent)
         f.close()
+                    
+        self.partitionFrequencies ()
+    
+    
 
     def initBeat (self):
 
@@ -83,7 +91,7 @@ class SimpleLayoutApplication:
 
     def __init__(self, filename):
         self.num_rails = 4
-        self.rails = []
+        self._rails = []
         
         self.testdelay = 0
         
