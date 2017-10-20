@@ -259,9 +259,8 @@ class MovingRectangle:
         self.coordinates ['topLeftX'] = startingX
         self.coordinates ['topLeftY'] = 0
         self.coordinates ['botRightX'] = width+startingX
-        self.coordinates ['botRightY'] = canvaswidth
+        self.coordinates ['botRightY'] = 2
         
-        self.canvaswidth = canvaswidth
         self.canvasheight = canvasheight
         
         self.visibility = False
@@ -307,9 +306,9 @@ class MovingRectangle:
 
 if __name__ == '__main__':
     
-    #filename = "KoiNoShirushi.mp3"
+    filename = "KoiNoShirushi.mp3"
     #filename = "test.mp3"
-    filename = "lithium.flac"
+    #filename = "lithium.flac"
     
     current_working_dir = os.getcwd()
     if not os.path.exists(current_working_dir + '/OnsetTimes/'):
