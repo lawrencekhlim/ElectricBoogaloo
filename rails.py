@@ -10,16 +10,11 @@ class SimpleLayoutApplication:
 
     def initOnset (self):
         # All objects the canvas is animating
-        self._rails = []
-        
         
         self._times = []
         f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
         for line in f:
-            self._times.append(int(float(line.strip())*1000))
-            rect = MovingRectangle (int (float(line.strip())*1000) , 0, self.width, self.height,timetoReachBottom=4000)
-            self._rails.append (rect)
-    
+            self.addOnsetToRail(int(float(line.strip())*1000))
         f.close()
     
     def addOnsetToRail(self, onset):
@@ -27,16 +22,16 @@ class SimpleLayoutApplication:
         # time and chooses which Rail(s) to add a rectangle to,
         # It needs to pick which Rail, and call the addRectangle function
         
-        framenumber = librosa.time_to_frames([currenttime/1000]) [0]
+        framenumber = librosa.time_to_frames([onset/1000]) [0]
 
         for rail in self._rails:
             total = 0
             ave = 0
             startFreq, endFreq = rail.getFrequencyRange()
-            total += self.transposed[framenumber][startFreq:endFreq]
+            total += sum(self.transposed[framenumber][startFreq:endFreq])
             ave = total/(endFreq-startFreq)
 
-            if ave > rail.getMedianVolume:
+            if ave > rail.getMedianVolume():
                 rail.addRectangle(onset)
     
 
@@ -337,7 +332,7 @@ class Rail:
         self.canvasheight = canvasheight
         self.timeToReachBottom = timeToReachBottom
         
-        rectangles = []
+        self.rectangles = []
     
     def calculateMedianVolume (self, spectroArray):
         total = 0
@@ -350,21 +345,21 @@ class Rail:
         self.medianVol = total/frequencies
     
     def addRectangle (self, onset):
-        rectangles.append(MovingRectangle (onset, self.startX, self.width, self.canvasheight, self.timeToReachBottom))
+        self.rectangles.append(MovingRectangle (onset, self.startX, self.width, self.canvasheight, self.timeToReachBottom))
     
     def moveRectangles (self, currenttime):
-        for i in range (0, len (rectangles)):
-            rectangles [i].move (currenttime)
+        for i in range (0, len (self.rectangles)):
+            self.rectangles [i].move (currenttime)
     
     def drawRectangles (self, canvas):
-        for i in range (0, len (rectangles)):
-            rectangles [i].draw (canvas)
+        for i in range (0, len (self.rectangles)):
+            self.rectangles [i].draw (canvas)
 
     def getMedianVolume (self):
         return self.medianVol
     
     def getFrequencyRange (self):
-        return (startFrequency, endFrequency)
+        return (self.startFrequency, self.endFrequency)
 
 
 
