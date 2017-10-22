@@ -55,11 +55,18 @@ class SimpleLayoutApplication:
         # The parameters it needs to calculate are:
         # width and x position
         # equally divided frequency ranges
+        
+        regular_array = list(zip(*self.transposed))
+        
         highest_freq = 0
-        for frequency_array in self.transposed:
-            for i in range(len(frequency_array)):
-                if frequency_array[i] == -35.6033 and i > highest_freq:
-                    highest_freq = i
+        for i in range(len(regular_array)):
+            sound_detected = False
+            for frame_vol in regular_array[i]:
+                if frame_vol != -35.6033:
+                    sound_detected = True
+                    break
+            if not sound_detected:
+                highest_freq = i
         
         self.frequency_range = highest_freq
         
@@ -350,8 +357,8 @@ class Rail:
 if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
-    filename = "test.mp3"
-    #filename = "lithium.flac"
+    #filename = "test.mp3"
+    filename = "lithium.flac"
     
 
     app = SimpleLayoutApplication(filename)
