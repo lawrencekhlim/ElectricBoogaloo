@@ -23,7 +23,8 @@ class SimpleLayoutApplication:
         # It needs to pick which Rail, and call the addRectangle function
         
         framenumber = librosa.time_to_frames([onset/1000]) [0]
-
+        
+        railAdded = False
         for rail in self._rails:
             total = 0
             ave = 0
@@ -32,8 +33,14 @@ class SimpleLayoutApplication:
             ave = total/(endFreq-startFreq)
 
             if ave > rail.getMedianVolume():
-                rail.addRectangle(onset)
-    
+                if not railAdded:
+                    rail.addRectangle(onset)
+                    railAdded = True
+                else:
+                    if ave > rail.getMedianVolume() + (rail.getMaximumVolume() - rail.getMedianVolume())/5:
+                        rail.addRectangle(onset)
+                
+
 
 
     def partitionFrequencies(self):
@@ -50,6 +57,8 @@ class SimpleLayoutApplication:
         for i in range (0, self.num_rails):
             self._rails.append (Rail (i*frequency_length, i*frequency_length+frequency_length, i*rect_width, rect_width, self.height, 4000))
             self._rails[i].calculateMedianVolume (self.transposed)
+
+            self._rails[i].calculateMaxVolume(self.transposed)
 
 
 
@@ -105,7 +114,7 @@ class SimpleLayoutApplication:
         self.filename = filename
 	
         self.height = 600
-        self.width = 80
+        self.width = 200
         self.delay = 17
         
         self._root_window = tkinter.Tk()
@@ -332,6 +341,8 @@ class Rail:
         self.canvasheight = canvasheight
         self.timeToReachBottom = timeToReachBottom
         
+        self.maxVolume = 0
+        
         self.rectangles = []
     
     def calculateMedianVolume (self, spectroArray):
@@ -343,6 +354,16 @@ class Rail:
             frequencies += len(frame)
         
         self.medianVol = total/frequencies
+
+    def calculateMaxVolume(self, spectroArray):
+        maximum = 0
+        for frame in spectroArray:
+            localmax = max(frame)
+            if localmax > maximum:
+                maximum = localmax
+
+        self.maxVolume = maximum
+        
     
     def addRectangle (self, onset):
         self.rectangles.append(MovingRectangle (onset, self.startX, self.width, self.canvasheight, self.timeToReachBottom))
@@ -358,6 +379,9 @@ class Rail:
     def getMedianVolume (self):
         return self.medianVol
     
+    def getMaximumVolume(self):
+        return self.maxVolume
+    
     def getFrequencyRange (self):
         return (self.startFrequency, self.endFrequency)
 
@@ -371,8 +395,8 @@ class Rail:
 if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
-    filename = "test.mp3"
-    #filename = "lithium.flac"
+    #filename = "test.mp3"
+    filename = "lithium.flac"
     
     current_working_dir = os.getcwd()
     if not os.path.exists(current_working_dir + '/OnsetTimes/'):
