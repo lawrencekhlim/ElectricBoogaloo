@@ -6,16 +6,24 @@ import librosa
 import os
 import csv
 
+import soundanalysis
+
 class SimpleLayoutApplication:
 
+    def initSoundAnalysis (self):
+        self.soundanalysis = soundanalysis.SoundAnalysis()
+        self.soundanalysis.analyze_sound(self.filename)
+        self.initSpectro()
+        self.initOnset()
+        self.initBeat()
+    
+    
+    
+    
     def initOnset (self):
-        # All objects the canvas is animating
-        
-        self._times = []
-        f = open(os.getcwd() + '/OnsetTimes/' + self.filename + '.csv', 'r')
+        f = self.soundanalysis.get_onset (self.filename)
         for line in f:
-            self.addOnsetToRail(int(float(line.strip())*1000))
-        f.close()
+            self.addOnsetToRail(line)
     
     def addOnsetToRail(self, onset):
         # This function is called inside initOnset, and requires and onset
@@ -64,12 +72,8 @@ class SimpleLayoutApplication:
 
     def initSpectro (self):
         #Deals with the spectrogram
-        f = open(os.getcwd() + '/SpectroInfo/' + self.filename + '.csv', 'r')
-        reader = csv.reader(f)
-        self.transposed = []
+        self.transposed = self.soundanalysis.get_spectro (self.filename)
         
-        for row in reader:
-            self.transposed.append([float(val) for val in row])
 
         self.minimumVol = float(min([min(l) for l in self.transposed]))
         self.maximumVol = float(max([max(l) for l in self.transposed])) - self.minimumVol
@@ -90,23 +94,16 @@ class SimpleLayoutApplication:
         print(self.maximumVol)
         print(self.averageVol)
         print(self.averagepercent)
-        f.close()
                     
         self.partitionFrequencies ()
     
     
 
     def initBeat (self):
-
-        self._beat_times = []
-        f = open(os.getcwd() + '/BeatInfo/' + self.filename + '.csv', 'r')
-        for line in f:
-            self._beat_times.append(int(float(line.strip())*1000))
-        
-        f.close()
+        self._beat_times = self.soundanalysis.get_beat(self.filename)
 
     def __init__(self, filename):
-        self.num_rails = 4
+        self.num_rails = 7
         self._rails = []
         
         self.testdelay = 0
@@ -114,7 +111,7 @@ class SimpleLayoutApplication:
         self.filename = filename
 	
         self.height = 600
-        self.width = 200
+        self.width = 300
         self.delay = 17
         
         self._root_window = tkinter.Tk()
@@ -134,13 +131,7 @@ class SimpleLayoutApplication:
         self._root_window.rowconfigure(0, weight = 1)
         self._root_window.columnconfigure(0, weight = 1)
 
-        self.initSpectro()
-
-
-        self.initOnset()
-
-
-        self.initBeat()
+        self.initSoundAnalysis ()
     
     
     def _on_canvas_resized(self, event: tkinter.Event) -> None:
@@ -396,43 +387,8 @@ if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
     #filename = "test.mp3"
-    filename = "lithium.flac"
+     filename = "lithium.flac"
     
-    current_working_dir = os.getcwd()
-    if not os.path.exists(current_working_dir + '/OnsetTimes/'):
-        os.makedirs(current_working_dir + '/OnsetTimes/')
-    
-    if not os.path.exists(current_working_dir + '/SpectroInfo/'):
-        os.makedirs(current_working_dir + '/SpectroInfo/')
 
-    if not os.path.exists(current_working_dir + '/BeatInfo/'):
-        os.makedirs(current_working_dir + '/BeatInfo/')
-
-
-    if not os.path.exists(current_working_dir + '/OnsetTimes/' + filename + '.csv'):
-        y, sr = librosa.load(filename)
-        onset_frames = librosa.onset.onset_detect(y=y, sr=sr)
-        onset_times = librosa.frames_to_time(onset_frames, sr=sr) 
-        librosa.output.times_csv(current_working_dir + '/OnsetTimes/' + filename +'.csv', onset_times)
-    
-    if not os.path.exists(current_working_dir + '/SpectroInfo/'+filename+'.csv'):
-        y, sr = librosa.load (filename)
-        S = np.abs (librosa.stft(y))
-        
-        arr = librosa.power_to_db(S**2)
-        transposearr = [list(i) for i in zip(*arr)]
-
-        with open(current_working_dir + '/SpectroInfo/'+filename+'.csv', "w") as f:
-            writer = csv.writer(f)
-            writer.writerows(transposearr)
-
-    if not os.path.exists(current_working_dir + '/BeatInfo/'+filename+'.csv'):
-        y, sr = librosa.load (filename)
-        tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr)
-        beat_times = librosa.frames_to_time(beat_frames, sr=sr)
-        librosa.output.times_csv(current_working_dir + '/BeatInfo/' + filename +'.csv', beat_times)
-
-
-    print("Running gui")
     app = SimpleLayoutApplication(filename)
     app.run()
