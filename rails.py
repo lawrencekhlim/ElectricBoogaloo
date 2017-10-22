@@ -2,8 +2,6 @@ import tkinter
 import time
 import numpy as np
 import librosa
-import os
-import csv
 
 import soundanalysis
 import mediaplayer
@@ -38,7 +36,7 @@ class SimpleLayoutApplication:
             ave = 0
             startFreq, endFreq = rail.getFrequencyRange()
             total += sum(self.transposed[framenumber][startFreq:endFreq])
-            ave = total/(endFreq-startFreq)
+            ave = total/(endFreq-startFreq+1)
 
             if ave > rail.getMedianVolume():
                 if not railAdded:
@@ -352,8 +350,8 @@ class Rail:
 if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
-    #filename = "test.mp3"
-    filename = "lithium.flac"
+    filename = "test.mp3"
+    #filename = "lithium.flac"
     
 
     app = SimpleLayoutApplication(filename)
