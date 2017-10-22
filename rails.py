@@ -57,7 +57,13 @@ class SimpleLayoutApplication:
         # The parameters it needs to calculate are:
         # width and x position
         # equally divided frequency ranges
-        self.frequency_range = len (self.transposed [0])
+        highest_freq = 0
+        for frequency_array in self.transposed:
+            for i in range(len(frequency_array)):
+                if frequency_array[i] == -35.6033 and i > highest_freq:
+                    highest_freq = i
+        
+        self.frequency_range = highest_freq
         
         frequency_length = (int)(self.frequency_range/self.num_rails)
         
