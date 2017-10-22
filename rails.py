@@ -387,7 +387,7 @@ if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
     #filename = "test.mp3"
-     filename = "lithium.flac"
+    filename = "lithium.flac"
     
 
     app = SimpleLayoutApplication(filename)
