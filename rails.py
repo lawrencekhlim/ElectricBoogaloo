@@ -12,12 +12,17 @@ class SimpleLayoutApplication:
     def keyPressed (self, a):
         print ("A KEY WAS PRESSED")
         print (repr(a.char))
-    
+        
+        print()
+        print()
+        print()
+        print()
+        print()
         s = "asdfghjkl"
-        index = s.find (repr(a.char))
-        if (index != -1):
-            if index < len (self._rails):
-                self._rails[index].keyPressed(repr(a.char))
+        ind = s.find(a.char)
+        if ind != -1:
+            if ind < len (self._rails):
+                self._rails[ind].keyPressed(a.char)
     
     
     def initKeyBindings (self):
@@ -167,7 +172,6 @@ class SimpleLayoutApplication:
         canvas_width = self._canvas.winfo_width()
         for obj in self._rails:
             obj.coordinates['botRightX'] = canvas_width
-
         self.redrawAll()
         '''
         pass
@@ -378,8 +382,8 @@ class Rail:
 if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
-    filename = "discord.mp3"
-    #filename = "lithium.flac"
+    #filename = "discord.mp3"
+    filename = "Camera Obscura - Honey in the Sun.flac"
     
 
     app = SimpleLayoutApplication(filename)
