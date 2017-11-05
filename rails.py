@@ -7,6 +7,21 @@ import soundanalysis
 import mediaplayer
 
 class SimpleLayoutApplication:
+    
+    
+    def keyPressed (self, a):
+        print ("A KEY WAS PRESSED")
+        print (repr(a.char))
+    
+        s = "asdfghjkl"
+        index = s.find (repr(a.char))
+        if (index != -1):
+            if index < len (self._rails):
+                self._rails[index].keyPressed(repr(a.char))
+    
+    
+    def initKeyBindings (self):
+        self._root_window .bind('<Key>', self.keyPressed)
 
     def initSoundAnalysis (self):
         self.soundanalysis = soundanalysis.SoundAnalysis()
@@ -141,6 +156,8 @@ class SimpleLayoutApplication:
 
         self._root_window.rowconfigure(0, weight = 1)
         self._root_window.columnconfigure(0, weight = 1)
+        
+        self.initKeyBindings()
 
         self.initSoundAnalysis ()
     
@@ -325,6 +342,10 @@ class Rail:
                 maximum = localmax
 
         self.maxVolume = maximum
+    
+    def keyPressed (self, character):
+        print ("THIS RAIL KEY was pressed" )
+        print (character)
         
     
     def addRectangle (self, onset):
@@ -357,8 +378,8 @@ class Rail:
 if __name__ == '__main__':
     
     #filename = "KoiNoShirushi.mp3"
-    #filename = "test.mp3"
-    filename = "lithium.flac"
+    filename = "discord.mp3"
+    #filename = "lithium.flac"
     
 
     app = SimpleLayoutApplication(filename)
